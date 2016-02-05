@@ -1,0 +1,12 @@
+/out
+/.idea
+/target
+/*.iml
+**-rtl.css
+/**/selenium*
+grails-app/conf/SeleniumConfig.groovy
+web-app/WEB-INF/tld/**/*
+/node
+/node_modules
+/public/lib
+.slcache/
