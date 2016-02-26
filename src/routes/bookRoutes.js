@@ -1,5 +1,4 @@
 var express = require('express');
-var oracledb = require('oracledb');
 var bookRouter = express.Router();
 
 oracledb.outFormat = oracledb.OBJECT;
