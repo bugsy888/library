@@ -1,79 +1,39 @@
 var express = require('express');
 var bookRouter = express.Router();
-
-oracledb.outFormat = oracledb.OBJECT;
+var mongodb = require('mongodb').MongoClient;
+var objectId = require('mongodb').ObjectID;
 
 var router = function(nav) {
     bookRouter.route('/')
-        .all(function (req, res, next) {
-            oracledb.getConnection(
-                {
-                    user: 'plural',
-                    password: 'S1ght',
-                    connectString: 'nodetest'
-                },
-                function (err, connection) {
-                    if (err) {
-                        console.error(err.message);
-                        return;
-                    }
-                    connection.execute(
-                        'SELECT * FROM books ',
-                        function (err, result) {
-                            if (err) {
-                                console.error(err.message);
-                                return;
-                            } else {
-                                req.books = result.rows;
-                                next();
-                            }
-                        }
-                    );
-                }
-            );
-        })
         .get(function (req, res) {
-            res.render('bookListView', {
-                title: 'Books',
-                nav: nav,
-                books: req.books
+            var url = 'mongodb://localhost:27017/libraryApp';
+            mongodb.connect(url, function (err, db) {
+                var collection = db.collection('books');
+                collection.find({}).toArray(
+                    function (err, results) {
+                        res.render('bookListView', {
+                            title: 'Books',
+                            nav: nav,
+                            books: results
+                        });
+                    })
             });
         });
 
     bookRouter.route('/:id')
-        .all(function(req, res, next) {
-            oracledb.getConnection(
-                {
-                    user: 'plural',
-                    password: 'S1ght',
-                    connectString: 'nodetest'
-                },
-                function (err, connection) {
-                    if (err) {
-                        console.error(err.message);
-                        return;
-                    }
-                    connection.execute(
-                        'SELECT * FROM books WHERE ID = :id',
-                        [req.params.id],
-                        function (err, result) {
-                            if (err) {
-                                console.error(err.message);
-                                return;
-                            } else {
-                                req.book = result.rows[0];
-                                next();
-                            }
-                        }
-                    );
-                }
-            );
-        })
-        .get(function(req, res) {
-            res.render('bookView', {
-                title: 'Book',
-                nav: nav,
-                book: req.book
+        .get(function (req, res) {
+            var id = new objectId(req.params.id);
+            var url = 'mongodb://localhost:27017/libraryApp';
+            mongodb.connect(url, function (err, db) {
+                var collection = db.collection('books');
+                collection.findOne({_id: id},
+                    function (err, results) {
+                        res.render('bookView', {
+                            title: 'Book',
+                            nav: nav,
+                            book: results
+                        });
+                    })
             });
         });
 
